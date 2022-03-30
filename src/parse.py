@@ -8,7 +8,7 @@ def read_task(filename : Path):
 
     with open(filename, "r") as file:
         lines = file.read().splitlines()
-    if len(lines) == 0:
+    if len(lines) < 2:# Small hardcode but okay
         return
     townNum = 0
     #fill closeTime

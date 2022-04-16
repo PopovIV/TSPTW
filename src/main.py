@@ -1,11 +1,12 @@
-from parse import read_task
+from task import task
 
 if __name__ == "__main__":
-    returnValue = read_task("example.txt")
-    if returnValue is None:
+
+    #get task 
+    t = task("report.txt")
+    if t.isInit is False:
         print("Error in parse")
     else:
-        C, open, close = returnValue
-        print(C)
-        print(open)
-        print(close)
+        print(t.C)
+        print(t.openTime)
+        print(t.closeTime)

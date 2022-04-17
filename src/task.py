@@ -1,6 +1,7 @@
 from pathlib import Path
 
 class task:
+
     # constructor
     def __init__(self, filename: Path):
         C = list()# Costs matrix
@@ -12,22 +13,22 @@ class task:
         if len(lines) < 2:# Small hardcode but okay
             return
         townNum = 0
-        #fill closeTime
+        # fill closeTime
         times = lines.pop(-1).split()
         townNum = len(times)
         closeTime = [int(time) for time in times]
-        #fill openTime
+        # fill openTime
         times = lines.pop(-1).split()
         if townNum != len(times):
             return
         openTime = [int(time) for time in times]
-        #fill C
+        # fill C
         while len(lines) > 0:
             costs = lines.pop(0).split()
             if townNum != len(costs):
                 return
             C.append([int(cost) for cost in costs])
-        #check sizes
+        # check sizes
         if len(C) != townNum:
             return
 

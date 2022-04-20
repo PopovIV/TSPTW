@@ -1,4 +1,7 @@
+import warnings
 from collections import defaultdict
+
+MAX_EXHAUSTIVE = 10
 
 
 def _matrix_to_dict(mat):
@@ -21,6 +24,12 @@ def backtrack(t, *, start=0, end=0, search_all=True):
     :param search_all: bool, whether to find all the paths, or to return the first found
     :return: dict of <path>: <time>
     """
+    assert len(t.closeTime) < 22, "Tests have shown it takes unreasonable amount of time to find a solution for bigger" \
+                                  "dimensions"
+    if search_all and len(t.closeTime) > MAX_EXHAUSTIVE:
+        warnings.warn("search_all is switched to `False` as the computation will take forever")
+        search_all = False
+
     _start_node, _end_node = start, end
 
     # helper funcs

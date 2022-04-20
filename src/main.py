@@ -12,5 +12,10 @@ if __name__ == "__main__":
         # solve task with ant method
         solver = antSolver(t)
         print("Ant method solution:")
-        solution = solver.solve()
+        solution, cost, time = solver.solve()
+        print("Towns to visit in order:")
         print(solution)
+        print("Total cost of path:")
+        print(cost)
+        print("Total time of path:")
+        print(time)

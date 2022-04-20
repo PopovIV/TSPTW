@@ -3,16 +3,20 @@ import random
 from task import task
 from utils import closest_neighbor
 from utils import calculate_path_cost
-
+from utils import calculate_path_time
+from utils import check_path
 # global variables of algorithm
 n = 10 # number of iterations
-m = 2 # number of ants
+m = 10 # number of ants
 # curvature factors
 delta = 0.01
 alpha = 0.01
 # heuristic coefficients
 beta = 0.5
 gamma = 0.5
+# pheromone renewal coefficients
+z = 0.1
+p = 0.1
 # path selection factor
 q0 = 0.9
 
@@ -24,7 +28,7 @@ class antSolver:
         self.t = t
 
     # main method to solve task
-    # out : solution path
+    # out : solution path + sum of path + total time
     def solve(self):
         if self.t.isInit == False:
             return
@@ -40,11 +44,12 @@ class antSolver:
         # main cycle begins
         globalSolution = list()
         for iteration in range(n):
+            localSolutions = list()
             for ant in range(m):
                 localSolution = list()
                 localSolution.append(0)
                 curTime = openTime[0]# current time in path
-                curTown = 0;# index of town where we are
+                curTown = 0# index of town where we are
                 townsToVisit = [i for i in range(1, N)]# indexies of towns to visit
                 
                 while(len(townsToVisit) != 0):
@@ -106,9 +111,33 @@ class antSolver:
                     else:
                         curTime += C[curTown][nextTown]
                     curTown = nextTown
-                #come back to 0-town
+                # come back to 0-town
                 localSolution.append(0)
+                if check_path(C, openTime, closeTime, localSolution) == False:
+                    continue
+                localSolutions.append(localSolution)
                 if len(globalSolution) == 0 or calculate_path_cost(C, globalSolution) > calculate_path_cost(C, localSolution):
                     globalSolution = localSolution
-        return globalSolution
+            # when all ants finish their roots
+            # local rule
+            pheromoneMatrixChanges = [[0] * N for i in range(N)]
+            for sol in localSolutions:
+                solCost = 1 / calculate_path_cost(C, sol)
+                for i in range(len(C)):
+                    pheromoneMatrixChanges[sol[i]][sol[i + 1]] += solCost
+            for i in range(len(pheromoneMatrix)):
+                for j in range(len(pheromoneMatrix)):
+                    pheromoneMatrix[i][j] = pheromoneMatrix[i][j] * (1 - z) + z * pheromoneMatrixChanges[i][j]
+
+            #global rule
+            pheromoneMatrixChanges = [[0] * N for i in range(N)]
+            solCost = 1 / calculate_path_cost(C, globalSolution)
+            for i in range(len(C)):
+                pheromoneMatrixChanges[globalSolution[i]][globalSolution[i + 1]] += solCost
+            for i in range(len(pheromoneMatrix)):
+                for j in range(len(pheromoneMatrix)):
+                    pheromoneMatrix[i][j] = pheromoneMatrix[i][j] * (1 - p) + p * pheromoneMatrixChanges[i][j]
+
+        # end of all iterations
+        return globalSolution, calculate_path_cost(C, globalSolution), calculate_path_time(C, openTime, globalSolution)
 

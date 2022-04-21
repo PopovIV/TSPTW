@@ -18,6 +18,43 @@ def closest_neighbor(C):
 
     return res
 
+# closest neighbor method for ant method by open time
+# in: openTime - array of open time of towns
+# out : list of indexies that represents path 
+def closest_neighbor_by_open_time(openTime):
+    res = list()  # list of indexies
+    N = len(openTime)  # number of cities
+
+    res.append(0)  # add first city manually
+    for i in range(N):
+        newIndex = 0
+        smallestCost = float('inf')
+        for j in range(N):
+            if (j not in res and openTime[j] < smallestCost):
+                newIndex = j
+                smallestCost = openTime[j]
+        res.append(newIndex)
+
+    return res
+
+# closest neighbor method for ant method by close time
+# in: openTime - array of closed time of towns
+# out : list of indexies that represents path 
+def closest_neighbor_by_close_time(closeTime):
+    res = list()  # list of indexies
+    N = len(closeTime)  # number of cities
+
+    res.append(0)  # add first city manually
+    for i in range(N):
+        newIndex = 0
+        smallestCost = float('inf')
+        for j in range(N):
+            if (j not in res and closeTime[j] < smallestCost):
+                newIndex = j
+                smallestCost = closeTime[j]
+        res.append(newIndex)
+
+    return res
 
 # calculate path cost
 # in : C - Costs matrix
@@ -61,3 +98,33 @@ def data_converter(dir_path, *, suffix=""):
                     closeT.append(c)
             with open(f"{dir_path}/{file}{suffix}", "w") as f:
                 f.writelines((*mat, " ".join(openT), "\n", " ".join(closeT)))
+
+# calculate path cost
+# in : C - Costs matrix
+#      openTime - array of open time of towns
+#      indexies - path indexies
+# out : time of path
+def calculate_path_time(C, openTime, indexies):
+    res = 0
+    for i in range(len(C)):
+        res += C[indexies[i]][indexies[i + 1]]
+        if res < openTime[indexies[i + 1]]:
+            res = openTime[indexies[i + 1]]
+    return res
+
+# really dunno if this function has any point but let it be
+# check if solution is corret (no time window errors)
+# in : C - Costs matrix
+#      openTime - array of opem time of towns
+#      closeTime - array of close time of towns
+#      indexies - path indexies
+# out : true of false - flag that path is correct or not
+def check_path(C, openTime, closeTime, indexies):
+    curTime = 0
+    for i in range(len(C)):
+        curTime += C[indexies[i]][indexies[i + 1]]
+        if curTime > closeTime[indexies[i + 1]]:
+            return False
+        if curTime < openTime[indexies[i + 1]]:
+            curTime = openTime[indexies[i + 1]]
+    return True

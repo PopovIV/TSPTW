@@ -2,11 +2,13 @@ import numpy as np
 import random
 from task import task
 from utils import closest_neighbor
+from utils import closest_neighbor_by_open_time
+from utils import closest_neighbor_by_close_time
 from utils import calculate_path_cost
 from utils import calculate_path_time
 from utils import check_path
 # global variables of algorithm
-n = 10 # number of iterations
+n = 2000 # number of iterations
 m = 10 # number of ants
 # curvature factors
 delta = 0.01
@@ -18,7 +20,7 @@ gamma = 0.5
 z = 0.1
 p = 0.1
 # path selection factor
-q0 = 0.9
+q0 = 0.7
 
 # ant method solver class 
 class antSolver:
@@ -30,19 +32,20 @@ class antSolver:
     # main method to solve task
     # out : solution path + sum of path + total time
     def solve(self):
-        if self.t.isInit == False:
-            return
         # find first path by closest neighbor method
         openTime = self.t.openTime# Town opening time
         closeTime = self.t.closeTime# Town closing time
         C = self.t.C# matrix cost
         N = len(C)# number of cities
-        path = closest_neighbor(C)
+        path = closest_neighbor_by_close_time(closeTime)
         # calculate pheromone matrix
+        if check_path(C, openTime, closeTime, path) == False:
+            print("bad first path")
+            return
         pheromone = N * calculate_path_cost(C, path)
         pheromoneMatrix = [[1 / pheromone] * N for i in range(N)]# matrix of pheromones on roads
         # main cycle begins
-        globalSolution = list()
+        globalSolution = path
         for iteration in range(n):
             localSolutions = list()
             for ant in range(m):
@@ -66,7 +69,7 @@ class antSolver:
                     d /= len(townsToVisit)
                     s /= len(townsToVisit)
                     # calculate local heuristics (in fact find town with the most coef)
-                    maxCoef = 0
+                    maxCoef = -1
                     bestChoice = 0
                     arrayOfCoef = list()
                     for townIndex in townsToVisit:
@@ -87,6 +90,9 @@ class antSolver:
                         if(p > maxCoef):
                             maxCoef = p
                             bestChoice = townIndex
+                    #check if no town was good to visit
+                    if maxCoef == 0:
+                        break
                     #calculate random choice
                     maxCoef = 0
                     randomChoice = 0
@@ -113,6 +119,8 @@ class antSolver:
                     curTown = nextTown
                 # come back to 0-town
                 localSolution.append(0)
+                if len(localSolution) != N + 1:
+                    continue
                 if check_path(C, openTime, closeTime, localSolution) == False:
                     continue
                 localSolutions.append(localSolution)

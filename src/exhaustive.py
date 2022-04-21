@@ -1,5 +1,7 @@
 from itertools import permutations
 
+MAX_EXHAUSTIVE = 10
+
 
 def exhaustive(t):
     """ computes the brute force salesman problem with time constraints
@@ -17,7 +19,7 @@ def exhaustive(t):
     _perm = set(range(len(t.openTime))) - {_start_node, _end_node}
     # path: cost
     res = {}
-    assert len(_perm) < 12, "Way too many nodes, it'll take one forever to compute!"
+    assert len(_perm) < MAX_EXHAUSTIVE, "Way too many nodes, it'll take one forever to compute!"
     for comb in permutations(_perm, len(_perm)):
         curr_time = 0
         curr_node = _start_node

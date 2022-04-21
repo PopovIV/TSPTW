@@ -1,5 +1,6 @@
 from task import task
 from antSolver import antSolver
+from exhaustive import exhaustive
 
 if __name__ == "__main__":
 
@@ -9,6 +10,7 @@ if __name__ == "__main__":
     if t.isInit is False:
         print("Error in parse")
     else:
+        print(exhaustive(t))
         # solve task with ant method
         solver = antSolver(t)
         print("Ant method solution:")

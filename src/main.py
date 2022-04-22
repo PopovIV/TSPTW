@@ -22,7 +22,9 @@ if __name__ == "__main__":
             c_num = len(t.openTime)  # number of clients in the current test file
             if s <= c_num < e:
                 print(f"{file}, # of clients: {c_num}")
+                print("Forward:")
                 #pprint(exhaustive(t))
                 #pprint(backtrack(t))
+                print("Ants:")
                 print(antSolver(t).solve())
                 print()

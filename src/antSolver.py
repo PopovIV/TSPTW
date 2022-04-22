@@ -7,9 +7,10 @@ from utils import closest_neighbor_by_close_time
 from utils import calculate_path_cost
 from utils import calculate_path_time
 from utils import check_path
+
 # global variables of algorithm
-n = 2000 # number of iterations
-m = 10 # number of ants
+n = 6000 # number of iterations
+m = 50 # number of ants
 # curvature factors
 delta = 0.01
 alpha = 0.01
@@ -20,7 +21,7 @@ gamma = 0.5
 z = 0.1
 p = 0.1
 # path selection factor
-q0 = 0.7
+q0 = 0.8
 
 # ant method solver class 
 class antSolver:
@@ -41,9 +42,12 @@ class antSolver:
         # calculate pheromone matrix
         if check_path(C, openTime, closeTime, path) == False:
             print("bad first path")
-            return
-        pheromone = N * calculate_path_cost(C, path)
+            pheromone = N * n
+        else:
+            print(path)
+            pheromone = N * calculate_path_cost(C, path)
         pheromoneMatrix = [[1 / pheromone] * N for i in range(N)]# matrix of pheromones on roads
+        delta_pheromone = pheromone
         # main cycle begins
         globalSolution = path
         for iteration in range(n):
@@ -94,16 +98,20 @@ class antSolver:
                     if maxCoef == 0:
                         break
                     #calculate random choice
-                    maxCoef = 0
-                    randomChoice = 0
-                    den = 0
-                    for coef in arrayOfCoef:
-                        den += coef
-                    for i in range(len(arrayOfCoef)):
-                        p = arrayOfCoef[i] / den
-                        if(p > maxCoef):
-                            maxCoef = p
-                            randomChoice = townsToVisit[i]
+                    p = random.randint(0, len(arrayOfCoef) - 1)
+                    while(arrayOfCoef[p] <= 0):
+                        p = random.randint(0, len(arrayOfCoef) - 1)
+                    randomChoice = townsToVisit[p]
+                    #maxCoef = 0
+                    #randomChoice = 0
+                    #den = 0
+                    #for coef in arrayOfCoef:
+                    #    den += coef
+                    #for i in range(len(arrayOfCoef)):
+                    #    p = arrayOfCoef[i] / den
+                    #    if(p > maxCoef):
+                    #        maxCoef = p
+                    #        randomChoice = townsToVisit[i]
                     # make a move with random generator
                     q = random.uniform(0, 1)
                     if q > q0:
@@ -136,16 +144,17 @@ class antSolver:
             for i in range(len(pheromoneMatrix)):
                 for j in range(len(pheromoneMatrix)):
                     pheromoneMatrix[i][j] = pheromoneMatrix[i][j] * (1 - z) + z * pheromoneMatrixChanges[i][j]
-
             #global rule
+            if len(globalSolution) == 0:
+                continue
             pheromoneMatrixChanges = [[0] * N for i in range(N)]
-            solCost = 1 / calculate_path_cost(C, globalSolution)
+            solCost = 1 / calculate_path_time(C, openTime, globalSolution)
             for i in range(len(C)):
                 pheromoneMatrixChanges[globalSolution[i]][globalSolution[i + 1]] += solCost
             for i in range(len(pheromoneMatrix)):
                 for j in range(len(pheromoneMatrix)):
                     pheromoneMatrix[i][j] = pheromoneMatrix[i][j] * (1 - p) + p * pheromoneMatrixChanges[i][j]
-
         # end of all iterations
+        if len(globalSolution) == 0:
+            return None
         return globalSolution, calculate_path_cost(C, globalSolution), calculate_path_time(C, openTime, globalSolution)
-

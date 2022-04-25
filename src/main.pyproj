@@ -25,6 +25,8 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="backtrack.py" />
+    <Compile Include="b_cl.py" />
+    <Compile Include="b_op.py" />
     <Compile Include="exhaustive.py" />
     <Compile Include="main.py" />
     <Compile Include="task.py" />

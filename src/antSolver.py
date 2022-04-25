@@ -7,21 +7,22 @@ from utils import closest_neighbor_by_close_time
 from utils import calculate_path_cost
 from utils import calculate_path_time
 from utils import check_path
+import matplotlib.pyplot as plt
 
 # global variables of algorithm
-n = 6000 # number of iterations
-m = 50 # number of ants
+n = 2000 # number of iterations
+m = 20 # number of ants
 # curvature factors
 delta = 0.01
 alpha = 0.01
 # heuristic coefficients
-beta = 0.5
-gamma = 0.5
+beta = 0.4
+gamma = 0.6
 # pheromone renewal coefficients
 z = 0.1
 p = 0.1
 # path selection factor
-q0 = 0.8
+q0 = 0.7
 
 # ant method solver class 
 class antSolver:
@@ -44,13 +45,16 @@ class antSolver:
             print("bad first path")
             pheromone = N * n
         else:
-            print(path)
+            print("First path: " + str(path) + " with cost: " + str(calculate_path_cost(C, path)))
             pheromone = N * calculate_path_cost(C, path)
         pheromoneMatrix = [[1 / pheromone] * N for i in range(N)]# matrix of pheromones on roads
         delta_pheromone = pheromone
         # main cycle begins
+        lastImprovement = 0
+        iteration = 0
         globalSolution = path
-        for iteration in range(n):
+        while True:
+        #for iteration in range(n):
             localSolutions = list()
             for ant in range(m):
                 localSolution = list()
@@ -90,7 +94,8 @@ class antSolver:
                             w = 1
                         # coef to select this town
                         p = pheromoneMatrix[curTown][townIndex] * (f ** beta) * (w ** gamma)
-                        arrayOfCoef.append(p)
+                        if(p > 0):
+                            arrayOfCoef.append(p)
                         if(p > maxCoef):
                             maxCoef = p
                             bestChoice = townIndex
@@ -98,21 +103,12 @@ class antSolver:
                     if maxCoef == 0:
                         break
                     #calculate random choice
-                    p = random.randint(0, len(arrayOfCoef) - 1)
-                    while(arrayOfCoef[p] <= 0):
+                    if len(arrayOfCoef) == 0:
+                        randomChoice = bestChoice
+                    else:
                         p = random.randint(0, len(arrayOfCoef) - 1)
-                    randomChoice = townsToVisit[p]
-                    #maxCoef = 0
-                    #randomChoice = 0
-                    #den = 0
-                    #for coef in arrayOfCoef:
-                    #    den += coef
-                    #for i in range(len(arrayOfCoef)):
-                    #    p = arrayOfCoef[i] / den
-                    #    if(p > maxCoef):
-                    #        maxCoef = p
-                    #        randomChoice = townsToVisit[i]
-                    # make a move with random generator
+                        randomChoice = townsToVisit[p]
+
                     q = random.uniform(0, 1)
                     if q > q0:
                         nextTown = randomChoice
@@ -133,9 +129,16 @@ class antSolver:
                     continue
                 localSolutions.append(localSolution)
                 if len(globalSolution) == 0 or calculate_path_cost(C, globalSolution) > calculate_path_cost(C, localSolution):
+                    print(f"Next improv at {iteration}:" + str(localSolution) + " with cost: " + str(calculate_path_cost(C, localSolution)) \
+                    + " with time: " + str(calculate_path_time(C, openTime, localSolution)))
+                    lastImprovement = 0
                     globalSolution = localSolution
             # when all ants finish their roots
             # local rule
+            lastImprovement += 1
+            iteration += 1
+            if lastImprovement == n:
+                break
             pheromoneMatrixChanges = [[0] * N for i in range(N)]
             for sol in localSolutions:
                 solCost = 1 / calculate_path_cost(C, sol)
@@ -158,3 +161,49 @@ class antSolver:
         if len(globalSolution) == 0:
             return None
         return globalSolution, calculate_path_cost(C, globalSolution), calculate_path_time(C, openTime, globalSolution)
+
+    def solveWithAnts(self, realSolution):
+        cost = calculate_path_cost(self.t.C, realSolution)
+        m = 10
+        ants = list()
+        error = list()
+        times = list()
+        while True:
+            ants.append(m)
+            sol = self.solve(m)[1]
+            error.append((sol - cost) / cost)
+            m += 10
+            if(m > 130):
+                break
+
+        fig = plt.figure()
+        plt.title("График зависимости ошибки от количества муравьев")
+        plt.xlabel("Количество муравьев")
+        plt.ylabel("Ошибка")
+        plt.plot(ants, error)
+        plt.grid(True)
+        plt.show()
+        return ants, error
+
+    def solveWithIterations(self, realSolution):
+        cost = calculate_path_cost(self.t.C, realSolution)
+        n = 1000
+        ants = list()
+        error = list()
+        times = list()
+        while True:
+            ants.append(n)
+            sol = self.solve(n)[1]
+            error.append((sol - cost) / cost)
+            n += 50
+            if(n > 6000):
+                break
+
+        fig = plt.figure()
+        plt.title("График зависимости ошибки от количества итераций")
+        plt.xlabel("Количество итераций")
+        plt.ylabel("Ошибка")
+        plt.plot(ants, error)
+        plt.grid(True)
+        plt.show()
+        return ants, error

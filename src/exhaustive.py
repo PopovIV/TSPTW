@@ -1,5 +1,5 @@
 from itertools import permutations
-
+from utils import calculate_path_cost
 MAX_EXHAUSTIVE = 10
 
 
@@ -32,5 +32,5 @@ def exhaustive(t):
             curr_node = node_num
         # if the `break` wasn't fired
         else:
-            res[(_start_node, *comb, _end_node)] = _get_curr_time(_end_node)
+            res[(_start_node, *comb, _end_node)] = calculate_path_cost(t.C, (_start_node, *comb, _end_node)), _get_curr_time(_end_node)
     return res

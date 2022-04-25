@@ -4,8 +4,7 @@ from collections import defaultdict
 MAX_EXHAUSTIVE = 10
 
 
-# def _matrix_to_dict(mat, op):
-def _matrix_to_dict(mat):
+def _matrix_to_dict(mat, op):
     """ converts matrix to the adjacency list
 
     :param mat: matrix to convert
@@ -13,8 +12,7 @@ def _matrix_to_dict(mat):
     """
     # <node>: <nodes one can visit>
     # the nodes are sorted in ascending costs, the path from the node to itself is removed
-    # return {i: sorted(range(len(op)), key=op.__getitem__) for i, _ in enumerate(mat)}
-    return {i: [j for j, _ in sorted(enumerate(line), key=lambda a: a[1]) if j != i] for i, line in enumerate(mat)}
+    return {i: sorted(range(len(op)), key=op.__getitem__) for i, _ in enumerate(mat)}
 
 
 def backtrack(t, *, start=0, end=0, search_all=True):
@@ -26,8 +24,6 @@ def backtrack(t, *, start=0, end=0, search_all=True):
     :param search_all: bool, whether to find all the paths, or to return the first found
     :return: dict of <path>: <time>
     """
-    # assert len(t.closeTime) < 22, "Tests have shown it takes unreasonable amount of time to find a solution for bigger" \
-    #                               "dimensions"
     if search_all and len(t.closeTime) > MAX_EXHAUSTIVE:
         warnings.warn("search_all is switched to `False` as the computation will take forever")
         search_all = False
@@ -42,8 +38,7 @@ def backtrack(t, *, start=0, end=0, search_all=True):
     res = {}
     # <node>: {<restricted nodes from the node>}
     prohibited = defaultdict(set)
-    graph = _matrix_to_dict(t.C)
-    # graph = _matrix_to_dict(t.C, t.closeTime)
+    graph = _matrix_to_dict(t.C, t.openTime)
 
     # setting initial state
     path = [_start_node]
